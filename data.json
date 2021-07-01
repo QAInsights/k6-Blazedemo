@@ -1,0 +1,6 @@
+{
+  "flights": [
+    { "from": "Paris", "to": "New York" },
+    { "from": "New York", "to": "Paris" }
+  ]
+}
