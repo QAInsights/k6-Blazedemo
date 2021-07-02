@@ -1,5 +1,4 @@
-// Creator: k6 Browser Recorder 0.6.1
-
+// Importing relevant js libraries from k6
 import { sleep, group, check } from "k6";
 import { SharedArray } from "k6/data";
 
@@ -7,21 +6,17 @@ import http from "k6/http";
 
 export const options = { vus: 1, duration: "1m" };
 
+// Reading test date from data.json
 const data = new SharedArray("Flights", function() { return JSON.parse(open('./data.json')).flights; });
 
 let flightFrom = data[0];
 let flightTo = data[0];
 
-console.log("Flying from: " + flightFrom.from);
-console.log("Flying to: " + flightTo.to);
-
-
-
-
+// Reserve Page
 export default function main() {
   let response;
 
-  group("page_2 - https://blazedemo.com/reserve.php", function () {
+  group("Reserve - https://blazedemo.com/reserve.php", function () {
     response = http.post(
       "https://blazedemo.com/reserve.php",
       {
@@ -52,23 +47,25 @@ export default function main() {
     
   });
 
+  // Checking response code
   check(response, {
     'is status 200': (r) => r.status === 200,
   });
 
+  // Extracting information such as Flight, Price and Airline Name
   const pageResponse  =  response.body;
-
   const getFlight = /<input type="hidden" value="(.+?)" name="(.+?)">/g;
-
   const matches = pageResponse.matchAll(getFlight);
+  
   let flightID = [];
 
+  // Looping thru the matches
   for (const match of matches){
       flightID.push(match[1]);
   }
 
-
-  group("page_3 - https://blazedemo.com/purchase.php", function () {
+  // Purchase page  
+  group("Purchase - https://blazedemo.com/purchase.php", function () {
     response = http.post(
       "https://blazedemo.com/purchase.php",
       {
@@ -101,12 +98,13 @@ export default function main() {
     sleep(2);
   });
 
+  // Checking the response code
   check(response, {
     'is status 200': (r) => r.status === 200,
   });
 
-
-  group("page_4 - https://blazedemo.com/confirmation.php", function () {
+  // Confirmation Page
+  group("Confirmation - https://blazedemo.com/confirmation.php", function () {
     response = http.post(
       "https://blazedemo.com/confirmation.php",
       {
@@ -143,7 +141,8 @@ export default function main() {
       }
     );
   });
-
+  
+  // Checking the response code
   check(response, {
     'is status 200': (r) => r.status === 200,
   });
